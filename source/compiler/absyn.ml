@@ -655,8 +655,8 @@ let isSkeletonVariableType = function
 let rec makeTypeEnvironment i =
   match i with
       0 -> []
-    | i' ->
-        if i' < 0 then
+    | i2 ->
+        if 0 > i2 then
           Errormsg.impossible Errormsg.none 
                               "Absyn.makeTypeEnvironment: invalid environment size"
         else
@@ -1163,7 +1163,7 @@ type atermcontext =
 **********************************************************************)
 let rec needsParens opfix opprec context fix prec =
   let checkLE () = opprec <= prec in
-  let checkL () = opprec < prec in
+  let checkL () = prec > opprec in
   let checkLeft () =
     match opfix with
       Infix
