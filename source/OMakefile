@@ -1,3 +1,5 @@
+
+
 ############################################################
 # Define subdirectories
 #
@@ -13,14 +15,20 @@ LOD = $(dir loader)
 LNK = $(dir linker)
 TST = $(dir test)
 INC = $(dir include)
-
+IPYTHON = $(dir ipython)
+IPYTHON_KERNEL = /Users/jakob/src/projects/ipython-ocaml-kernel/
 ############################################################
 # Compile flags
 #
 
-OCAMLINCLUDES += $(CMP) $(DIS) $(SIM) $(LOD)
+OCAMLINCLUDES += $(CMP) $(DIS) $(SIM) $(LOD) $(IPYTHON_KERNEL)
+# CAMLLIB += /Users/jakob/src/projects/ipython-ocaml-kernel
 CFLAGS += -g
-
+USE_OCAMLFIND = false
+# OCAMLFINDFLAGS = -syntax camlp4o -package dyntype.syntax
+OCAML_OTHER_LIBS += deriving
+OCAMLOPTFLAGS = -verbose # -pp deriving # -verbose -syntax camlp4o -package dyntype.syntax
+# OCAMLDEPFLAGS = -pp deriving
 ############################################################
 # Compilation files
 #
@@ -180,6 +188,7 @@ SIM_MAIN = $(FNT)/simulatorfront
 LNK_MAIN = $(FNT)/linkerfront
 DEP_MAIN = $(FNT)/dependfront
 PAR_MAIN = $(FNT)/parsefront
+IPYTHON_MAIN = $(IPYTHON)/ipythonfront
 
 ############################################################
 # Platform specific changes
@@ -248,9 +257,9 @@ gen: $(INSTR_ML_FILES) $(PERV_ML_FILES) $(INSTR_C_FILES) $(PERV_C_FILES)
 # Include subdirectories
 #
 
-.SUBDIRS: compiler disassembler front include linker loader simulator system tables
+.SUBDIRS:  compiler disassembler front include linker loader simulator system tables ipython
     if $(file-exists OMakefile)
-        include OMakefile
+	include OMakefile
 
 
 ############################################################
@@ -266,8 +275,10 @@ if $(not $(file-exists prebuilt))
   OCamlProgram(tjdis, $(DIS_MAIN) $(CMP_ML) $(LOD_ML) $(DIS_ML) $(FNT_ML))
 
   OCamlProgram(tjdepend, $(DEP_MAIN) $(DEP_ML) $(FNT_ML))
-  
+
   OCamlProgram(tjparse, $(PAR_MAIN) $(PAR_ML) $(FNT_ML))
+
+  OCamlProgram(tjkernel, $(CMP_MAIN) $(CMP_ML) $(LOD_ML) $(FNT_ML))
 
   # The simulator and linker require linking with C code
 
@@ -283,6 +294,15 @@ if $(not $(file-exists prebuilt))
     OCAML_CLIBS += liblink
     OCamlProgram(tjlink, $(LNK_MAIN) $(FNT_ML))
 
+  # integration with foreign library kernel and unix
+  section
+    KERNEL_LIB=/Users/jakob/src/projects/ipython-xlang-kernel/src
+    KERNEL_OCAML_LIB=/Users/jakob/src/projects/ipython-ocaml-kernel
+    OCAMLINCLUDES += /Users/jakob/src/projects/ipython-ocaml-kernel/
+    OCAML_OTHER_LIBS += unix kernel
+    OCAML_LINK_FLAGS += -cclib -L$(KERNEL_LIB) -cclib -lipython-xlang-kernel -cclib -L$(KERNEL_OCAML_LIB)
+    OCamlProgram(tjipython, $(IPYTHON_MAIN) $(CMP_ML))
+
 
 TJCC = $(CWD)/tjcc$(EXE)
 TJSIM = $(CWD)/tjsim$(EXE)
@@ -290,9 +310,10 @@ TJDIS = $(CWD)/tjdis$(EXE)
 TJLINK = $(CWD)/tjlink$(EXE)
 TJDEPEND = $(CWD)/tjdepend$(EXE)
 TJPARSE = $(CWD)/tjparse$(EXE)
+TJIPYTHON = $(CWD)/tjipython$(EXE)
 
 .PHONY: all
-all: $(TJCC) $(TJSIM) $(TJDIS) $(TJLINK) $(TJDEPEND) $(TJPARSE)
+all: $(TJCC) $(TJSIM) $(TJDIS) $(TJLINK) $(TJDEPEND) $(TJPARSE) $(TJIPYTHON)
 
 ############################################################
 # Testing Targets

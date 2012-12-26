@@ -174,6 +174,7 @@ let makeSignature () =
 %token <float> REALLIT
 
 %type <Preabsyn.pmodule> parseModule parseSignature
+%type <(Preabsyn.pmodule * Preabsyn.pmodule)>  parseSigMod
 %type <Preabsyn.pterm> parseModClause
 %type <unit> modheader sigheader
 %type <unit> modend sigend modpreamble modbody
@@ -198,7 +199,7 @@ let makeSignature () =
 
 /* Higher precedence */
 
-%start parseModule parseSignature parseModClause
+%start parseModule parseSignature parseSigMod  parseModClause
 
 %%
 parseModule:
@@ -210,6 +211,10 @@ parseSignature:
   | error                                       { genericError "signature" ;
                                                   makeSignature () }
 
+parseSigMod:
+  | parseSignature parseModule { ($1, $2) }      
+
+      
 tok:
   | ID                        { $1 }
   | UPCID                     { $1 }

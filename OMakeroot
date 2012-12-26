@@ -8,4 +8,14 @@ if $(mem $(OSTYPE), Win32 Cygwin)
 open build/C
 open build/OCaml
 
+Deriving(module) =
+    section
+        OCAMLOPTFLAGS += -pp deriving
+        OCAMLDEPFLAGS += -pp deriving
+        $(module).cmi:
+        $(module).cmo:
+        $(module).o:
+        $(module).cmx:
+
+
 .SUBDIRS: .
