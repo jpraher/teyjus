@@ -24,8 +24,42 @@
 exception InternalError
 open Lexing
 
-type pos = position
+type pos = position 
 
+    (*
+  	pos_fname :string;
+   	pos_lnum :int;
+   	pos_bol :int;
+   	pos_cnum :int;
+*)
+open Show
+module Show_pos : Show.Show with
+      type a = Lexing.position =
+    Show.Defaults
+      (Defaults
+         (struct
+            type a = Lexing.position
+            
+            let format formatter {Lexing.pos_fname=v0; pos_lnum=v1; pos_bol=v2; pos_cnum=v3} =
+              (Format.pp_open_hovbox formatter 0;
+                     Format.pp_print_char formatter '{';
+                     Format.pp_print_string formatter "pos_fname =";
+                     Show_string.format formatter v0;
+                     Format.pp_print_string formatter "; ";
+                     Format.pp_print_string formatter "pos_lnum =";
+                     Show_int.format formatter v1;
+                     Format.pp_print_string formatter "; ";
+                     Format.pp_print_string formatter "pos_bol =";
+                     Show_int.format formatter v2;
+                     Format.pp_print_string formatter "; ";
+                     Format.pp_print_string formatter "pos_cnum =";
+                     Show_int.format formatter v3;
+                     Format.pp_print_char formatter '}';
+                     Format.pp_close_box formatter ()
+              )
+          end))
+
+    
 let anyErrors = ref false
 
 let errorsEnabled = ref true

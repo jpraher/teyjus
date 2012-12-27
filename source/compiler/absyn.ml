@@ -22,8 +22,8 @@
 *Absyn:
 * The abstract syntax representation.
 *****************************************************************************)
-type pos = Errormsg.pos
-type symbol = Symbol.symbol
+type pos = Errormsg.pos deriving (Show)
+type symbol = Symbol.symbol deriving (Show)
 
 (*****************************************************************************
 *Kinds:
@@ -122,7 +122,7 @@ and afixity =
 and acodeinfo = 
     Builtin of int
   | Clauses of aclausesblock
-
+      
 (*****************************************************************************
 *Variables (name based):
 *   (symbol, hidden constant, newtysy, type)
@@ -260,7 +260,9 @@ and aaccumulatedmodule =
 and aclauseinfo = 
     ClauseBlocks of aclausesblock list
   | PreClauseBlocks of adefinitions
+  deriving (Show)
 
+      
 (*****************************************************************************)
 (*Auxiliary functions:                                                       *)
 (*****************************************************************************)

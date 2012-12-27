@@ -26,6 +26,7 @@
 * is the same as the mapped string.
 **********************************************************************)
 type symbol = string * string * int
+    deriving (Show)
 
 let hashtable = Hashtbl.create 1
 

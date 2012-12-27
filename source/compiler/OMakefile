@@ -2,6 +2,7 @@
 
 Deriving(errormsg)
 Deriving(absyn)
+Deriving(symbol)
 
 #lpyacc.cmx: lpyacc.ml
 #	section rule

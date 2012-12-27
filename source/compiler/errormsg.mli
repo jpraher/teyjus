@@ -29,6 +29,8 @@ exception InternalError
 
 type pos = Lexing.position
 
+module Show_pos : Show.Show with type a = Lexing.position
+    
 (*  none: indicates a lack of error information.  *)
 val none : pos
 

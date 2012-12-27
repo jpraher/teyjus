@@ -17,16 +17,17 @@ TST = $(dir test)
 INC = $(dir include)
 IPYTHON = $(dir ipython)
 IPYTHON_KERNEL = /Users/jakob/src/projects/ipython-ocaml-kernel/
+DERIVING = /Users/jakob/extsrc/deriving/lib
 ############################################################
 # Compile flags
 #
 
-OCAMLINCLUDES += $(CMP) $(DIS) $(SIM) $(LOD) $(IPYTHON_KERNEL)
+OCAMLINCLUDES += $(CMP) $(DIS) $(SIM) $(LOD) $(IPYTHON_KERNEL) $(DERIVING)
 # CAMLLIB += /Users/jakob/src/projects/ipython-ocaml-kernel
 CFLAGS += -g
 USE_OCAMLFIND = false
 # OCAMLFINDFLAGS = -syntax camlp4o -package dyntype.syntax
-OCAML_OTHER_LIBS += deriving
+OCAML_OTHER_LIBS += nums deriving
 OCAMLOPTFLAGS = -verbose # -pp deriving # -verbose -syntax camlp4o -package dyntype.syntax
 # OCAMLDEPFLAGS = -pp deriving
 ############################################################

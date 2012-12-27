@@ -27,6 +27,8 @@
 **********************************************************************)
 type symbol
 
+module Show_symbol : Show.Show with type a = symbol
+  
 (**********************************************************************
 *symbol:
 * Produces a new symbol from the given string.  The ID of symbols with
@@ -34,7 +36,7 @@ type symbol
 * print name is the same as the given string.
 **********************************************************************)
 val symbol : string -> symbol
-
+  
 (**********************************************************************
 *symbolAlias:
 * Produces a new symbol from the given string together with a given 
