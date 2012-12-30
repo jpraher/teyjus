@@ -35,9 +35,18 @@ struct
         0
 end
 
-module SymbolTable = Map.Make(OrderedSymbol)
-type 'a symboltable = 'a SymbolTable.t
 
+module SymbolTable =
+  struct
+    include Map.Make(OrderedSymbol)
+    open Show
+    module Show_t(V:Show) :Show with type a = V.a t
+      = Show.Show_map(OrderedSymbol)(Symbol.Show_symbol)(V)
+  end
+
+    
+type 'a symboltable = 'a SymbolTable.t
+    
 let find =
   fun k table ->
     try

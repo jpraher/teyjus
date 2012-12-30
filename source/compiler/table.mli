@@ -21,9 +21,19 @@
 (**********************************************************************
 *Table
 **********************************************************************)
-module SymbolTable : Map.S with type key = Symbol.symbol
+module rec SymbolTable : 
+sig
+  type key = Symbol.symbol 
+  include Map.S with type key := Symbol.symbol 
+  (* module Show_t = Show.Defaults *)
 
-type 'a symboltable = 'a SymbolTable.t
+  module Show_t
+    (V : Show.Show)
+    : Show.Show with type a = V.a SymbolTable.t
+
+end
+    
+type 'a symboltable = 'a SymbolTable.t 
 
 val find : SymbolTable.key -> 'a SymbolTable.t -> 'a option
 val add : SymbolTable.key -> 'a -> 'a SymbolTable.t -> 'a SymbolTable.t

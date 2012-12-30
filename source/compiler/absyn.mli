@@ -262,6 +262,9 @@ and aclauseinfo =
     ClauseBlocks of aclausesblock list
   | PreClauseBlocks of adefinitions
 
+
+module Show_amodule : Show.Show with type a = amodule
+      
 (*************************************************************************)
 (*  akind:                                                               *)
 (*************************************************************************)
