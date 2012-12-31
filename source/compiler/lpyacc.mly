@@ -41,8 +41,27 @@
 open Lexing
 open Preabsyn
 
-let basename () =
+let modulename = ref ""
+
+let basename_from_fname () =
   Filename.chop_extension (Filename.basename (symbol_start_pos ()).pos_fname)
+
+let basename () =
+  let fname = basename_from_fname ()  in
+  if fname = "" then
+    ! modulename
+  else  
+    fname
+
+let check_basename m =
+  let bname = basename () in
+  if bname = "" then
+    begin
+      modulename := m ;
+      true
+    end
+  else 
+    bname = m
 
 type pos = Errormsg.pos
 
@@ -223,7 +242,7 @@ tok:
 
 modheader:
   | MODULE tok PERIOD
-      { if basename () <> "" && getIDName $2 <> basename () then
+      { if check_basename (getIDName $2) = false then
           Errormsg.error (getPos 2)
             ("Expected module name '" ^ basename () ^
             "', found module name '" ^ (getIDName $2) ^ "'.") }
@@ -232,7 +251,7 @@ modheader:
 
 sigheader:
   | SIG tok PERIOD
-      { if basename () <> "" && getIDName $2 <> basename () then
+      { if check_basename (getIDName $2) = false then
           Errormsg.error (getPos 2)
             ("Expected signature name '" ^ basename () ^ "'.") }
 
