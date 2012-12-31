@@ -223,7 +223,7 @@ tok:
 
 modheader:
   | MODULE tok PERIOD
-      { if getIDName $2 <> basename () then
+      { if basename () <> "" && getIDName $2 <> basename () then
           Errormsg.error (getPos 2)
             ("Expected module name '" ^ basename () ^
             "', found module name '" ^ (getIDName $2) ^ "'.") }
@@ -232,7 +232,7 @@ modheader:
 
 sigheader:
   | SIG tok PERIOD
-      { if getIDName $2 <> basename () then
+      { if basename () <> "" && getIDName $2 <> basename () then
           Errormsg.error (getPos 2)
             ("Expected signature name '" ^ basename () ^ "'.") }
 
