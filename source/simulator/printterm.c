@@ -61,14 +61,14 @@ int PRINT_numQueryVars;
 /* flag determining whether or not to print sensible names for free vars */
 Boolean PRINT_names = FALSE;
 
-static void PRINT_writeTerm(WordPtr outStream, DF_TermPtr tmPtr, 
+static void PRINT_writeTerm(WordPtr outStream, DF_TermPtr tmPtr,
                             OP_FixityType infx, int inprec, OP_TermContext tc);
 
 /****************************************************************************
  *                   Auxiliary routines used in this file                   *
  ****************************************************************************/
-static Boolean PRINT_parenNeeded(OP_FixityType opfx, int opprec, 
-                                 OP_TermContext context, OP_FixityType fx, 
+static Boolean PRINT_parenNeeded(OP_FixityType opfx, int opprec,
+                                 OP_TermContext context, OP_FixityType fx,
                                  int prec)
 {
     Boolean pparen = FALSE;
@@ -76,11 +76,11 @@ static Boolean PRINT_parenNeeded(OP_FixityType opfx, int opprec,
         switch (fx) {
         case OP_INFIX: case OP_INFIXR: case OP_POSTFIX:
             if (opprec <= prec) pparen = TRUE;   break;
-        case OP_INFIXL: case OP_POSTFIXL: 
+        case OP_INFIXL: case OP_POSTFIXL:
         {
             switch (opfx) {
             case OP_PREFIX: case OP_INFIX: case OP_INFIXL: case OP_POSTFIX:
-            case OP_POSTFIXL: 
+            case OP_POSTFIXL:
                 if (opprec < prec) pparen = TRUE; break;
             default:
                 if (opprec <= prec) pparen = TRUE; break;
@@ -132,13 +132,13 @@ static void PRINT_writeNilSymbol(WordPtr outStream)
 static void PRINT_writeInfixLam(WordPtr outStream)
 { STREAM_printf(outStream, "\\ ");                           }
 
-static void PRINT_writeLam(WordPtr outStream, int numabs) 
+static void PRINT_writeLam(WordPtr outStream, int numabs)
 { STREAM_printf(outStream, "lam(%d, ", numabs);               }
 
 static void PRINT_writeSpace(WordPtr outStream, int i)
-{ while (i--) STREAM_printf(outStream, " ");                 }    
+{ while (i--) STREAM_printf(outStream, " ");                 }
 
-static void PRINT_writeEquals(WordPtr outStream) 
+static void PRINT_writeEquals(WordPtr outStream)
 { STREAM_printf(outStream, " = ");                           }
 
 static void PRINT_writeComma(WordPtr outStream)
@@ -146,7 +146,7 @@ static void PRINT_writeComma(WordPtr outStream)
 
 static void PRINT_writeDPairStart(WordPtr outStream)
 { STREAM_printf(outStream, "<");                             }
-    
+
 static void PRINT_writeDPairEnd(WordPtr outStream)
 { STREAM_printf(outStream, ">");                             }
 
@@ -188,11 +188,11 @@ while printing; this structure enables the assignment of a unique integer
 to each runtime symbol table slot for such a constant. */
 typedef struct  PRINT_ConstList_ *PRINT_ConstList;
 
-struct  PRINT_ConstList_ 
+struct  PRINT_ConstList_
 {
     int   constInd;
     int   count;
-    PRINT_ConstList  next; 
+    PRINT_ConstList  next;
 };
 
 static PRINT_ConstList PRINT_clist = NULL;
@@ -201,7 +201,7 @@ static int PRINT_lccount = 0;
 static void PRINT_cleanCList()
 {
     PRINT_ConstList tmp;
-    
+
     PRINT_lccount = 0;
     while (PRINT_clist){
         tmp = PRINT_clist;
@@ -210,13 +210,13 @@ static void PRINT_cleanCList()
     }
 }
 
-/* writing out a hidden (local) constant name; as side effect, a note may be 
+/* writing out a hidden (local) constant name; as side effect, a note may be
    made of a new hidden (local) constant seen during this printing. */
 static void PRINT_writeHCName(WordPtr outStream, int constInd, int uc)
 {
     PRINT_ConstList lclist = PRINT_clist;
     while (lclist && (lclist->constInd != constInd)) lclist = lclist->next;
-    
+
     if (!lclist) {
         lclist = (PRINT_ConstList)EM_malloc(sizeof(struct PRINT_ConstList_));
         lclist->constInd = constInd;
@@ -224,7 +224,7 @@ static void PRINT_writeHCName(WordPtr outStream, int constInd, int uc)
         lclist->next     = PRINT_clist;
         PRINT_clist      = lclist;
     }
-    
+
     STREAM_printf(outStream, "<lc-%d-%d>", lclist->count, uc);
 }
 
@@ -233,7 +233,7 @@ static void PRINT_writeConst(WordPtr outStream, DF_TermPtr tmPtr)
 {
     int   constInd = DF_constTabIndex(tmPtr);
     char* name     = AM_cstName(constInd);
-    
+
     if (name) STREAM_printf(outStream, "%s", name);
     else PRINT_writeHCName(outStream, constInd, DF_constUnivCount(tmPtr));
 }
@@ -267,7 +267,7 @@ static DF_StrDataPtr PRINT_makeFVarName()
     cname[0] = '_';
     cname[1] = 'T';
     cname[length-1] = '\0';
-    
+
     i = PRINT_fvcounter;
     while(i) {
         cname[digits+1] = (i%10 + '0');
@@ -277,7 +277,7 @@ static DF_StrDataPtr PRINT_makeFVarName()
     PRINT_fvcounter++;
 
     fvname = (DF_StrDataPtr)EM_malloc(sizeof(Word)*(MCSTR_numWords(length) +
-						    DF_STRDATA_HEAD_SIZE));
+                                                    DF_STRDATA_HEAD_SIZE));
     DF_mkStrDataHead((MemPtr)fvname);
     MCSTR_toString((MemPtr)((MemPtr)fvname + DF_STRDATA_HEAD_SIZE),
                    cname, length);
@@ -291,9 +291,9 @@ static Boolean PRINT_nameInFVTab(DF_StrDataPtr name)
 {
     int i;
     for (i = 0; i < PRINT_numQueryVars ; i++){
-      if (MCSTR_sameStrs(DF_strDataValue(name), 
-			 DF_strDataValue(IO_freeVarTab[i].varName)))
-	return TRUE;
+      if (MCSTR_sameStrs(DF_strDataValue(name),
+                         DF_strDataValue(IO_freeVarTab[i].varName)))
+        return TRUE;
     }
     return FALSE;
 }
@@ -304,28 +304,28 @@ static void PRINT_writeFVar(WordPtr outStream, DF_TermPtr tmPtr)
     int           fvind = 0;
     DF_StrDataPtr fvname;
 
-		//PRINT_names = TRUE;
+                //PRINT_names = TRUE;
     if (PRINT_names) {
         IO_freeVarTab[IO_freeVarTabTop].rigdes = tmPtr;
-        
+
         while (tmPtr != IO_freeVarTab[fvind].rigdes) fvind++;
-        
+
         if (fvind == IO_freeVarTabTop) {
             /* i.e., a free variable not seen before */
-            if (IO_freeVarTabTop == IO_MAX_FREE_VARS) 
+            if (IO_freeVarTabTop == IO_MAX_FREE_VARS)
                 EM_error(BI_ERROR_TYFVAR_CAP);
-            
+
             while(1) {//make a name
                 fvname = PRINT_makeFVarName();
                 if (!PRINT_nameInFVTab(fvname)) break;
                 free(fvname);
             }
-            
+
             IO_freeVarTab[fvind].varName = fvname;
             IO_freeVarTabTop++;
         }
-        STREAM_printf(outStream, 
-	       MCSTR_toCString(DF_strDataValue(IO_freeVarTab[fvind].varName)));
+        STREAM_printf(outStream,
+               MCSTR_toCString(DF_strDataValue(IO_freeVarTab[fvind].varName)));
     } else { //PRINT_names = FALSE
         STREAM_printf(outStream, "_%ld", PRINT_makeNumberName(tmPtr));
     }
@@ -358,14 +358,14 @@ static void PRINT_cleanBV(PRINT_BVList bv)
 }
 
 /* releasing the space for bound variables; needed only in case of error
-   exit */  
+   exit */
 static void PRINT_cleanBVList()
 {
   PRINT_BVList tbvl;
 
   PRINT_bvcounter = 1;
   while (PRINT_bvs) {
-    tbvl = PRINT_bvs; PRINT_bvs = PRINT_bvs->next; 
+    tbvl = PRINT_bvs; PRINT_bvs = PRINT_bvs->next;
     PRINT_cleanBV(tbvl);
   }
 }
@@ -379,14 +379,14 @@ static void PRINT_writeBVar(WordPtr outStream, DF_TermPtr tmPtr)
   int bvind = DF_bvIndex(tmPtr);
   PRINT_BVList lbvs = PRINT_bvs;
 
-  for (i = bvind; ((i != 1) && lbvs) ; i--) 
+  for (i = bvind; ((i != 1) && lbvs) ; i--)
     lbvs = lbvs->next;
 
-  // Is this checking and the else branch really necessary? 
+  // Is this checking and the else branch really necessary?
   // Printing should start from top-level closed terms?
-  if (lbvs) STREAM_printf(outStream, "%s", 
-			  MCSTR_toCString(DF_strDataValue(lbvs->name)));
-  else STREAM_printf(outStream, "#%d", i); 
+  if (lbvs) STREAM_printf(outStream, "%s",
+                          MCSTR_toCString(DF_strDataValue(lbvs->name)));
+  else STREAM_printf(outStream, "#%d", i);
 }
 
 /****************************************************************************
@@ -398,7 +398,7 @@ static void PRINT_writeNil(WordPtr outStream)
 /****************************************************************************
  * Writing out a non-empty list.                                            *
  ****************************************************************************/
-static void PRINT_writeCons(WordPtr outStream, DF_TermPtr tmPtr, 
+static void PRINT_writeCons(WordPtr outStream, DF_TermPtr tmPtr,
                             OP_FixityType fx, int prec, OP_TermContext tc)
 {
     DF_TermPtr    args     = DF_consArgs(tmPtr);
@@ -408,9 +408,9 @@ static void PRINT_writeCons(WordPtr outStream, DF_TermPtr tmPtr,
     Boolean       pparen   = PRINT_parenNeeded(consfix, consprec, tc, fx,prec);
 
     if (pparen) PRINT_writeLParen(outStream);
-    PRINT_writeTerm(outStream, args, consfix, consprec, OP_LEFT_TERM);    
+    PRINT_writeTerm(outStream, args, consfix, consprec, OP_LEFT_TERM);
     PRINT_writeConsSymbol(outStream);
-    
+
     do {
         args++;
         tmPtr = DF_termDeref(args);
@@ -419,7 +419,7 @@ static void PRINT_writeCons(WordPtr outStream, DF_TermPtr tmPtr,
         PRINT_writeTerm(outStream, args, consfix, consprec, OP_LEFT_TERM);
         PRINT_writeConsSymbol(outStream);
     } while(1);
-    
+
     PRINT_writeTerm(outStream, tmPtr, consfix, consprec, OP_RIGHT_TERM);
     if (pparen) PRINT_writeRParen(outStream);
 }
@@ -443,7 +443,7 @@ static DF_StrDataPtr PRINT_makeBVarName()
   cname = (char*)EM_malloc(sizeof(char)*length);
   strcpy(cname, PRINT_bvname);
   cname[length-1] = '\0';
-  
+
   i = PRINT_bvcounter;
   while(i) {
     cname[digits] = (i%10 + '0');
@@ -453,16 +453,16 @@ static DF_StrDataPtr PRINT_makeBVarName()
   PRINT_bvcounter++;
 
   bvname = (DF_StrDataPtr)EM_malloc(sizeof(Word)*(MCSTR_numWords(length) +
-						  DF_STRDATA_HEAD_SIZE));
- 
+                                                  DF_STRDATA_HEAD_SIZE));
+
   DF_mkStrDataHead((MemPtr)bvname);
   MCSTR_toString((MemPtr)((MemPtr)bvname + DF_STRDATA_HEAD_SIZE),
-		 cname, length);
+                 cname, length);
   free(cname);
   return bvname;
 }
 
-static void PRINT_writeAbstBinders(WordPtr outStream, int nabs) 
+static void PRINT_writeAbstBinders(WordPtr outStream, int nabs)
 {
   DF_StrDataPtr bvname;
   PRINT_BVList  tmpbvs;
@@ -486,14 +486,14 @@ static void PRINT_writeAbstBinders(WordPtr outStream, int nabs)
   }
 }
 
-static void PRINT_writeAbst(WordPtr outStream, DF_TermPtr tmPtr, 
+static void PRINT_writeAbst(WordPtr outStream, DF_TermPtr tmPtr,
                             OP_FixityType fx, int prec, OP_TermContext tc)
-{    
+{
     int     numabs = 0;
     Boolean pparen = PRINT_parenNeeded(OP_LAM_FIXITY,OP_LAM_PREC,tc,fx,prec);
     PRINT_BVList tmpbvs;
     int          tmpbvc = PRINT_bvcounter;
-    
+
     if (pparen) PRINT_writeLParen(outStream);
     while (DF_isLam(tmPtr)){
         numabs += DF_lamNumAbs(tmPtr);
@@ -508,9 +508,9 @@ static void PRINT_writeAbst(WordPtr outStream, DF_TermPtr tmPtr,
       tmpbvs = PRINT_bvs;
       PRINT_bvs = PRINT_bvs->next;
       PRINT_cleanBV(tmpbvs);
-    } 
+    }
     PRINT_bvcounter = tmpbvc;
-}      
+}
 
 /****************************************************************************
  *                      WRITING OUT AN APPLICATION                          *
@@ -518,7 +518,7 @@ static void PRINT_writeAbst(WordPtr outStream, DF_TermPtr tmPtr,
  * Note that it is assumed that nested application structures are flattened *
  * during the full normalization process.                                   *
  ****************************************************************************/
-/* Getting the fixity and precedence for the head of an application. 
+/* Getting the fixity and precedence for the head of an application.
    Assume the pointer to the term head is already dereferenced. */
 static void PRINT_getHeadInfo(DF_TermPtr hdPtr, OP_FixityType *fx, int* prec)
 {
@@ -543,8 +543,8 @@ static void PRINT_getHeadInfo(DF_TermPtr hdPtr, OP_FixityType *fx, int* prec)
         *prec = OP_MINPREC;
         break;
     }
-}    
-        
+}
+
 /* Writing out a term with a prefix operator as head; we use the knowledge
 that the operator must be a constant here and that the pointer to it is
 fully dereferenced */
@@ -554,7 +554,7 @@ static void PRINT_writePrefixTerm(WordPtr outStream, DF_TermPtr head,
                                   DF_TermPtr args)
 {
     Boolean pparen = PRINT_parenNeeded(opfx, opprec, tc, fx, prec);
-    
+
     if (pparen) PRINT_writeLParen(outStream);
     PRINT_writeConst(outStream, head);
     PRINT_writeSpace(outStream, 1);
@@ -563,7 +563,7 @@ static void PRINT_writePrefixTerm(WordPtr outStream, DF_TermPtr head,
 }
 
 static void PRINT_writeInfixTerm(WordPtr outStream, DF_TermPtr head,
-                                 OP_FixityType opfx, int opprec, 
+                                 OP_FixityType opfx, int opprec,
                                  OP_TermContext tc, OP_FixityType fx, int prec,
                                  DF_TermPtr args)
 {
@@ -575,12 +575,12 @@ static void PRINT_writeInfixTerm(WordPtr outStream, DF_TermPtr head,
     PRINT_writeSpace(outStream, 1);
     PRINT_writeTerm(outStream, args+1, opfx, opprec, OP_RIGHT_TERM);
     if (pparen) PRINT_writeRParen(outStream);
-}                                  
+}
 
 static void PRINT_writePostfixTerm(WordPtr outStream, DF_TermPtr head,
-                                   OP_FixityType opfx, int opprec, 
+                                   OP_FixityType opfx, int opprec,
                                    OP_TermContext tc,OP_FixityType fx,int prec,
-                                   DF_TermPtr args) 
+                                   DF_TermPtr args)
 {
     Boolean pparen = PRINT_parenNeeded(opfx, opprec, tc, fx, prec);
     if(pparen) PRINT_writeLParen(outStream);
@@ -588,13 +588,13 @@ static void PRINT_writePostfixTerm(WordPtr outStream, DF_TermPtr head,
     PRINT_writeSpace(outStream, 1);
     PRINT_writeConst(outStream, head);
     if (pparen) PRINT_writeRParen(outStream);
-}                                  
+}
 
 /* Main routine for writing out an application term */
-static void PRINT_writeApp(WordPtr outStream, DF_TermPtr tmPtr, 
+static void PRINT_writeApp(WordPtr outStream, DF_TermPtr tmPtr,
                            OP_FixityType infx, int inprec, OP_TermContext tc)
-{   
-  
+{
+
     DF_TermPtr head   = DF_termDeref(DF_appFunc(tmPtr));
     DF_TermPtr args   = DF_appArgs(tmPtr);
     int        arity  = DF_appArity(tmPtr);
@@ -604,43 +604,43 @@ static void PRINT_writeApp(WordPtr outStream, DF_TermPtr tmPtr,
     int            prec;
 
     HN_hnorm(tmPtr);
-    PRINT_getHeadInfo(AM_head, &fix, &prec);  
-    
+    PRINT_getHeadInfo(AM_head, &fix, &prec);
+
     switch(fix){
     case OP_PREFIX: case OP_PREFIXR:
       if (arity == 1) {
-	pparen = FALSE;
-	PRINT_writePrefixTerm(outStream, head, fix, prec, tc, infx, inprec,
-			      args);
-	
-       } else { 
-	 if (pparen) PRINT_writeLParen(outStream);
-	 PRINT_writePrefixTerm(outStream, head, fix, prec, OP_LEFT_TERM,
-			       OP_APP_FIXITY, OP_APP_PREC, args);
+        pparen = FALSE;
+        PRINT_writePrefixTerm(outStream, head, fix, prec, tc, infx, inprec,
+                              args);
+
+       } else {
+         if (pparen) PRINT_writeLParen(outStream);
+         PRINT_writePrefixTerm(outStream, head, fix, prec, OP_LEFT_TERM,
+                               OP_APP_FIXITY, OP_APP_PREC, args);
        }
       arity--; args++;
       break;
     case OP_INFIX: case OP_INFIXL: case OP_INFIXR:
       if (arity == 2) {
-	pparen = FALSE;
-	PRINT_writeInfixTerm(outStream, head, fix, prec, tc, infx, inprec, 
-			     args);
+        pparen = FALSE;
+        PRINT_writeInfixTerm(outStream, head, fix, prec, tc, infx, inprec,
+                             args);
       } else {
-	if (pparen) PRINT_writeLParen(outStream);
-	PRINT_writeInfixTerm(outStream, head, fix, prec, OP_LEFT_TERM,
-			     OP_APP_FIXITY, OP_APP_PREC, args);
+        if (pparen) PRINT_writeLParen(outStream);
+        PRINT_writeInfixTerm(outStream, head, fix, prec, OP_LEFT_TERM,
+                             OP_APP_FIXITY, OP_APP_PREC, args);
       }
       arity -= 2; args += 2;
       break;
     case OP_POSTFIX: case OP_POSTFIXL:
       if (arity == 1) {
-	pparen = FALSE;
-	PRINT_writePostfixTerm(outStream, head, fix, prec, tc, infx,
-			       inprec, args);
-      }  else { 
-	if (pparen) PRINT_writeLParen(outStream);
-	PRINT_writePostfixTerm(outStream, head, fix, prec, OP_LEFT_TERM,
-			       OP_APP_FIXITY, OP_APP_PREC, args);
+        pparen = FALSE;
+        PRINT_writePostfixTerm(outStream, head, fix, prec, tc, infx,
+                               inprec, args);
+      }  else {
+        if (pparen) PRINT_writeLParen(outStream);
+        PRINT_writePostfixTerm(outStream, head, fix, prec, OP_LEFT_TERM,
+                               OP_APP_FIXITY, OP_APP_PREC, args);
       }
       arity--; args++;
       break;
@@ -654,7 +654,7 @@ static void PRINT_writeApp(WordPtr outStream, DF_TermPtr tmPtr,
     while (arity > 0) {
         PRINT_writeSpace(outStream, 1);
         PRINT_writeTerm(outStream, args, OP_APP_FIXITY, OP_APP_PREC,
-			OP_RIGHT_TERM);
+                        OP_RIGHT_TERM);
         args++;
         arity--;
     }
@@ -666,7 +666,7 @@ static void PRINT_writeApp(WordPtr outStream, DF_TermPtr tmPtr,
  * The main routine for writing out a term; this is called by the interface  *
  * routines to do the real job of printing.                                  *
  *****************************************************************************/
-static void PRINT_writeTerm(WordPtr outStream, DF_TermPtr tmPtr, 
+static void PRINT_writeTerm(WordPtr outStream, DF_TermPtr tmPtr,
                             OP_FixityType infx, int inprec, OP_TermContext tc)
 {
     tmPtr = DF_termDeref(tmPtr);
@@ -679,13 +679,13 @@ static void PRINT_writeTerm(WordPtr outStream, DF_TermPtr tmPtr,
     case DF_TM_TAG_VAR:     PRINT_writeFVar(outStream, tmPtr);   break;
     case DF_TM_TAG_BVAR:    PRINT_writeBVar(outStream, tmPtr);   break;
     case DF_TM_TAG_NIL:     PRINT_writeNil(outStream);           break;
-    case DF_TM_TAG_CONS:    
+    case DF_TM_TAG_CONS:
         PRINT_writeCons(outStream, tmPtr, infx, inprec, tc);     break;
-    case DF_TM_TAG_LAM:     
+    case DF_TM_TAG_LAM:
         PRINT_writeAbst(outStream, tmPtr, infx, inprec, tc);     break;
     case DF_TM_TAG_APP:
         PRINT_writeApp(outStream, tmPtr, infx, inprec, tc);      break;
-    } /* switch */    
+    } /* switch */
 }
 
 
@@ -708,51 +708,58 @@ void PRINT_printTerm(DF_TermPtr tmPtr)
 static void PRINT_printSubsPair(WordPtr outStream, int ind)
 {
     DF_TermPtr tmPtr;
-    char *varName = 
-        MCSTR_toCString(DF_strDataValue(IO_freeVarTab[ind].varName));    
+    char *varName =
+        MCSTR_toCString(DF_strDataValue(IO_freeVarTab[ind].varName));
 
     /* print the variable name if it is not an anonymous variable */
-    if (strcmp(varName, "_") != 0) {        
+    if (strcmp(varName, "_") != 0) {
         STREAM_printf(outStream, varName);
-        
+
         /* Print the equals sign */
         PRINT_writeEquals(outStream);
-        
+
         /* Print the binding of the variable */
         tmPtr = IO_freeVarTab[ind].rigdes;
         HN_lnorm(tmPtr);
         PRINT_writeTerm(outStream, tmPtr, OP_NONE, 0, OP_WHOLE_TERM);
-    }    
+    }
 }
 
 void PRINT_showAnswerSubs()
 {
     int i;
-    
+
     PRINT_names = TRUE;
-    
+
     for (i = 0; i < PRINT_numQueryVars; i++) {
         PRINT_printSubsPair(STREAM_stdout, i);
         STREAM_printf(STREAM_stdout, "\n");
     }
 }
 
+
+void PRINT_getAnswerSubs(IO_FreeVarInfo ** answers, int * size) {
+    *size = PRINT_numQueryVars;
+    *answers = IO_freeVarTab;
+}
+
+
 /* Printing a disagreement pair to a specified output stream */
 static void PRINT_printDPair(WordPtr outStream, DF_DisPairPtr dpair)
 {
     DF_TermPtr tmPtr;
-    
+
     PRINT_writeDPairStart(outStream);
-    
+
     tmPtr = DF_disPairFirstTerm(dpair);
     HN_lnorm(tmPtr);
     PRINT_writeTerm(outStream, tmPtr, OP_NONE, 0, OP_WHOLE_TERM);
-    
+
     PRINT_writeComma(outStream);
     PRINT_writeSpace(outStream, 1);
-    
+
     tmPtr = DF_disPairSecondTerm(dpair);
-    HN_lnorm(tmPtr);    
+    HN_lnorm(tmPtr);
     PRINT_writeTerm(outStream, tmPtr, OP_NONE, 0, OP_WHOLE_TERM);
 
     PRINT_writeDPairEnd(outStream);
@@ -761,12 +768,12 @@ static void PRINT_printDPair(WordPtr outStream, DF_DisPairPtr dpair)
 void PRINT_showDisAgreeList()
 {
     DF_DisPairPtr liveList = AM_llreg;
-    
+
     while (DF_isNEmpDisSet(liveList)) {
         PRINT_printDPair(STREAM_stdout, liveList);
         liveList = DF_disPairNext(liveList);
         STREAM_printf(STREAM_stdout, "\n");
-    }    
+    }
 }
 
 void PRINT_setQueryFreeVariables()
@@ -775,7 +782,7 @@ void PRINT_setQueryFreeVariables()
 }
 
 /* Use this function to reset the top of the free variable table
-after a read; this is logical and also needed to avoid trying 
+after a read; this is logical and also needed to avoid trying
 to release print name space accidentally at some other point. */
 void PRINT_resetFreeVarTab()
 {
@@ -790,13 +797,13 @@ void PRINT_resetPrintState()
         IO_freeVarTabTop--;
         free(IO_freeVarTab[IO_freeVarTabTop].varName);
     }
-    
+
     /* reset counters used in names of anonymous term and type variables */
-    PRINT_fvcounter = 1; 
+    PRINT_fvcounter = 1;
 
     /* free space for information created for local consts and reset counter */
-    PRINT_cleanCList();    
-    
+    PRINT_cleanCList();
+
     /* free space for information created for bound vars and reset counter */
     PRINT_cleanBVList();
 }
@@ -804,12 +811,12 @@ void PRINT_resetPrintState()
 Boolean PRINT_queryHasVars()
 {
     int i = PRINT_numQueryVars - 1;
-    while (!(i < 0) && 
+    while (!(i < 0) &&
            (strcmp(MCSTR_toCString(DF_strDataValue(IO_freeVarTab[i].varName)),
-                   "_") == 0)) 
+                   "_") == 0))
         i--;
-    
+
     if (i < 0) return FALSE;
     else return TRUE;
-    
+
 }

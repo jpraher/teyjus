@@ -29,7 +29,7 @@
 #include "../simulator/builtins/builtins.h"
 #include "../simulator/builtins/readterm.h"
 #include "../simulator/printterm.h"
-
+#include "../simulator/io-datastructures.h"
 #include <stdio.h>
 
 /***************************************************************************/
@@ -61,17 +61,17 @@ int QUERY_solveQuery()
     EM_TRY {
         if (QUERY_reQuery) {// cause backtracking by setting simulator to fail
             AM_preg = AM_failCode;
-        } else { // set up to solve the query `solve(Query)' 
+        } else { // set up to solve the query `solve(Query)'
             AM_preg  = AM_solveCode;
             AM_cpreg = AM_proceedCode;
             DF_copyAtomic(RT_getTermStart(), (MemPtr)(AM_reg(1)));
             //PR_printTerm((DF_TermPtr)(AM_reg(1)));
-            
+
             QUERY_reQuery = TRUE;
         }
-        //invoke simulator 
+        //invoke simulator
         SIM_simulate();
-        
+
     } EM_CATCH {
         if (EM_CurrentExnType == EM_QUERY) {
             PRINT_resetPrintState();
@@ -83,25 +83,31 @@ int QUERY_solveQuery()
 
 /* show answers */
 int QUERY_showAnswers()
-{ 
+{
     EM_TRY {
         STREAM_printf(STREAM_stdout, "\n");
         STREAM_printf(STREAM_stdout,"The answer substitution:\n");
-        
+
         PRINT_showAnswerSubs();
-        
+
         if (AM_nempLiveList()){
             STREAM_printf(STREAM_stdout,"\n");
             STREAM_printf(STREAM_stdout,
                           "The remaining disagreement pairs list:\n") ;
             PRINT_showDisAgreeList();
         }
-        
+
         PRINT_resetPrintState();  /* reset printer state after display */
     } EM_CATCH {
         return EM_CurrentExnType;
     }
     return EM_NO_ERR;
+}
+
+/* TODO use cons for lists */
+void QUERY_getAnswerSubs(IO_FreeVarInfo ** answers, int *size)
+{
+    PRINT_getAnswerSubs(answers, size);
 }
 
 void QUERY_setQueryFreeVariables()

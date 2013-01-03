@@ -43,6 +43,7 @@
 
 #include "dataformats.h"
 #include "mctypes.h"
+#include "io-datastructures.h"
 
 /* set this variable to FALSE if variable names are to be displayed as
 `numbers' */
@@ -51,6 +52,10 @@ extern Boolean PRINT_names;
 void PRINT_fPrintTerm(WordPtr outStream, DF_TermPtr tmPtr);
 void PRINT_showAnswerSubs();
 void PRINT_showDisAgreeList();
+
+
+void PRINT_getAnswerSubs(IO_FreeVarInfo ** answers, int * size);
+
 
 void PRINT_resetFreeVarTab();
 void PRINT_setQueryFreeVariables();
