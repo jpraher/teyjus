@@ -15,14 +15,15 @@ LOD = $(dir loader)
 LNK = $(dir linker)
 TST = $(dir test)
 INC = $(dir include)
-IPYTHON = $(dir ipython)
+# IPYTHON = $(dir ipython)
 IPYTHON_KERNEL = /Users/jakob/src/projects/ipython-ocaml-kernel/
+YOJSON = $(shell ocamlfind query yojson)
 DERIVING = /Users/jakob/extsrc/deriving/lib
 ############################################################
 # Compile flags
 #
 
-OCAMLINCLUDES += $(CMP) $(DIS) $(SIM) $(LOD) $(IPYTHON_KERNEL) $(DERIVING)
+OCAMLINCLUDES += $(CMP) $(DIS) $(SIM) $(LOD) $(IPYTHON_KERNEL) $(DERIVING) $(YOJSON)
 # CAMLLIB += /Users/jakob/src/projects/ipython-ocaml-kernel
 CFLAGS += -g
 USE_OCAMLFIND = false
@@ -189,7 +190,7 @@ SIM_MAIN = $(FNT)/simulatorfront
 LNK_MAIN = $(FNT)/linkerfront
 DEP_MAIN = $(FNT)/dependfront
 PAR_MAIN = $(FNT)/parsefront
-IPYTHON_MAIN = $(IPYTHON)/ipythonfront
+IPYTHON_MAIN = $(FNT)/ipythonfront
 
 ############################################################
 # Platform specific changes
@@ -258,7 +259,7 @@ gen: $(INSTR_ML_FILES) $(PERV_ML_FILES) $(INSTR_C_FILES) $(PERV_C_FILES)
 # Include subdirectories
 #
 
-.SUBDIRS:  compiler disassembler front include linker loader simulator system tables ipython
+.SUBDIRS:  compiler disassembler front include linker loader simulator system tables
     if $(file-exists OMakefile)
 	include OMakefile
 
@@ -297,12 +298,21 @@ if $(not $(file-exists prebuilt))
 
   # integration with foreign library kernel and unix
   section
+    USE_OCAMLFIND = true
     KERNEL_LIB=/Users/jakob/src/projects/ipython-xlang-kernel/src
     KERNEL_OCAML_LIB=/Users/jakob/src/projects/ipython-ocaml-kernel
-    OCAMLINCLUDES += /Users/jakob/src/projects/ipython-ocaml-kernel/
-    OCAML_OTHER_LIBS += unix kernel
+    OCAMLINCLUDES += /Users/jakob/src/projects/ipython-ocaml-kernel/ $(shell ocamlfind query yojson)
+    OCAML_OTHER_LIBS += kernel
+    OCAMLPACKS[] =
+	unix
+	yojson
     OCAML_LINK_FLAGS += -cclib -L$(KERNEL_LIB) -cclib -lipython-xlang-kernel -cclib -L$(KERNEL_OCAML_LIB)
-    OCamlProgram(tjipython, $(IPYTHON_MAIN) $(CMP_ML))
+    # StaticCLibrary(liblink, $(SIM_C) $(SYS_C) $(TBL_C) $(LNK_C) $(INC_C))
+    # OCAML_CLIBS += liblink
+    StaticCLibrary(libsim, \
+      $(SIM_C) $(SYS_C) $(TBL_C) $(FNT_C) $(LOD_C) $(LNK_C) $(INC_C))
+    OCAML_CLIBS += libsim
+    OCamlProgram(tjipython, $(IPYTHON_MAIN) $(CMP_ML) $(LOD_ML) $(FNT_ML) $(FNT_ML_TO_C))
 
 
 TJCC = $(CWD)/tjcc$(EXE)
