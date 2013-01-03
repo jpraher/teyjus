@@ -53,7 +53,7 @@ let create_temp_env m = create_temp_dir Filename.temp_dir_name "teyjus" m
   
 let get_code : Yojson.Basic.json -> string = function obj -> Yojson.Basic.Util.to_string (Yojson.Basic.Util.member "code" obj)
 
-let get_string_member mem  = function obj -> Yojson.Basic.Util.to_string (Yojson.Basic.Util.member "input" obj ) 
+let get_string_member mem  = function obj -> Yojson.Basic.Util.to_string (Yojson.Basic.Util.member mem  obj ) 
 
 let get_input obj default = 
   try
@@ -130,26 +130,38 @@ let handle_query_program ctx code m =
    try
      let env_dir = Hashtbl.find ctx m in
      Front.systemInit 0;
-     Module.setPath env_dir;
+     Module.setPath (env_dir ^ "/");
      Module.moduleLoad m;
      Front.simulatorInit ();
      Module.moduleInstall m;
      Module.initModuleContext () ;
      (*todo interactive mode*)
-     let max_solutions = 100 in
+     let max_solutions = 1 in
+     let result = ref "" in
      let rec solve_query_batch_aux numResults =
        if Query.solveQuery () && numResults < max_solutions then
-         () 
+         let rec answers_to_string = function
+           | (var,term) :: rest ->  "(" ^ var ^ "," ^ term ^ ") " ^ (answers_to_string rest)
+           | [] -> ""
+         in
+         let () = Query.showAnswers () in
+         (*result := !result ^ answers_to_string answers ^ "\n";*)
+         solve_query_batch_aux numResults + 1           
+       else
+         numResults
      in
-     let solve_query query = 
-       if Query.buildQueryTerm query (Module.getCurrentModule ()) then
-         ()
-     in
-     Error("Error", "not implemented", [])
+     if Query.buildQueryTerm code (Module.getCurrentModule ()) then
+       begin
+         solve_query_batch_aux 0 ;
+         Success("text/plain", !result)
+       end
+     else
+       Error("Error_buildQueryTerm", code, [])
    with 
      | e ->
+         let ()  = prerr_endline ("Error " ^ (Printexc.to_string e) ^ " module " ^ m) in
          let ()  = flush_all () in
-         Error("Error", (Printexc.to_string e), [])
+         Error("Error", (Printexc.to_string e) ^ " module " ^ m , [])
 
               
 module TeyjusHandler = 

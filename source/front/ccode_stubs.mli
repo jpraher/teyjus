@@ -37,6 +37,8 @@ external solveQuery             : unit -> int  = "c_solveQuery"
 external showAnswers            : unit -> int  = "c_showAnswers"
 external setQueryFreeVariables  : unit -> unit = "c_setQueryFreeVariables"
 external queryHasVars           : unit -> bool = "c_queryHasVars"
+external getAnswers             : unit -> (string * string) list = "c_getAnswers"
+
 
 (* read term *)
 external initLocalTabs  : int -> int -> int -> int -> int = "c_initLocalTabs"

@@ -37,11 +37,12 @@ int LK_FILE_OpenInput(char* modname, char* extension)
   int fd;
   char* buf=(char *)EM_malloc(strlen(modname)+strlen(extension)+1);
   sprintf(buf,"%s%s",modname,extension);
-  
+  DEBUG(buf);
   fd=open(buf,O_RDONLY|O_BINARY,0000);
+  printf("fd %d\n",fd);
   if(fd==-1)
   {
-    bad("Couldn't open file %s for reading.\n",buf); 
+    bad("Couldn't open file %s for reading.\n",buf);
     EM_THROW(LK_LinkError);
   }
   return fd;
@@ -52,11 +53,11 @@ int LK_FILE_OpenOutput(char* modname, char* extension)
   int fd;
   char* buf=(char *)EM_malloc(strlen(modname)+strlen(extension)+1);
   sprintf(buf,"%s%s",modname,extension);
-  
+
   fd=open(buf,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,0666);
   if(fd==-1)
   {
-    bad("Couldn't open file %s for writing.\n",buf); 
+    bad("Couldn't open file %s for writing.\n",buf);
     EM_THROW(LK_LinkError);
   }
   return fd;
@@ -66,7 +67,7 @@ void LK_FILE_xPipe(int fd[2])
 {
   if(pipe(fd))
   {
-    bad("Couldn't open pipe.\n"); 
+    bad("Couldn't open pipe.\n");
     EM_THROW(LK_LinkError);
   }
 }
@@ -179,4 +180,3 @@ void LK_FILE_PutString(int fd, char* str)
   LK_FILE_PUT4(fd,size);
   write(fd,str,size);
 }
-

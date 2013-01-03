@@ -18,7 +18,7 @@
 // along with Teyjus.  If not, see <http://www.gnu.org/licenses/>.          //
 //////////////////////////////////////////////////////////////////////////////
 #include "../simulator/mctypes.h"
-
+#include "../simulator/io-datastructures.h"
 /***************************************************************************/
 /*                        solving queries                                  */
 /***************************************************************************/
@@ -34,3 +34,4 @@ int QUERY_showAnswers();
 void QUERY_setQueryFreeVariables();
 Boolean QUERY_queryHasVars();
 
+void QUERY_getAnswerSubs(IO_FreeVarInfo ** answers, int *size);

@@ -18,12 +18,15 @@
 // along with Teyjus.  If not, see <http://www.gnu.org/licenses/>.          //
 //////////////////////////////////////////////////////////////////////////////
 #include "../simulator/builtins/readterm.h"
+#include "../simulator/io-datastructures.h"
+#include "../simulator/printterm.h"
 #include "front_c.h"
 #include "query_c.h"
 #include "caml/mlvalues.h"
 #include "caml/memory.h"
 #include "caml/alloc.h"
 #include "caml/custom.h"
+#include "caml/callback.h"
 
 /***************************************************************************/
 /*                          front                                          */
@@ -112,6 +115,43 @@ int c_showAnswers(value v)
     CAMLreturn (Val_int(QUERY_showAnswers()));
 }
 
+
+value c_getAnswers(value v)
+{
+    CAMLparam1 (v);
+    CAMLlocal3( cli, cell, cons );
+
+    IO_FreeVarInfo * answers;
+    int size = 0;
+    QUERY_getAnswerSubs(&answers, &size);
+
+    cli = Val_emptylist;
+    int i;
+    for (i = 0; i < size; ++i) {
+        cons = caml_alloc(2,0);
+        cell = caml_alloc(2,0);
+
+        // internal pointer, just copy it
+        char *varName = MCSTR_toCString(DF_strDataValue(answers[i].varName));
+        Store_field(cell, 0, caml_copy_string(varName));
+
+        WordPtr stream = STREAM_toString();
+        char *str;
+        PRINT_names = FALSE;
+        PRINT_fPrintTerm(stream, (DF_TermPtr)answers[i].rigdes);
+        // internal pointer, just copy it
+        str = STREAM_getString(stream);
+        Store_field(cell, 0, caml_copy_string(str));
+        STREAM_close(stream);
+
+        Store_field(cons, 0, cell);
+        Store_field(cons, 1, cli);
+        cli = cons;
+    }
+    return cli;
+}
+
+
 void c_setQueryFreeVariables(value v)
 {
     CAMLparam1 (v);
@@ -131,12 +171,12 @@ Boolean c_queryHasVars(value v)
 /*                               read term                                 */
 /***************************************************************************/
 
-int c_initLocalTabs(value numFvs, value numTyFvs, value numTermArgs, 
+int c_initLocalTabs(value numFvs, value numTyFvs, value numTermArgs,
                      value numTypeArgs)
 {
     CAMLparam4 (numFvs, numTyFvs, numTermArgs, numTypeArgs);
     CAMLreturn(Val_int(RT_initLocalTabs(Int_val(numFvs), Int_val(numTyFvs),
-                                        Int_val(numTermArgs), 
+                                        Int_val(numTermArgs),
                                         Int_val(numTypeArgs))));
 }
 
@@ -196,7 +236,7 @@ int c_buildMConstantTerm(value index)
 int c_buildPConstantTerm(value index, value tyEnvSize)
 {
     CAMLparam2 (index, tyEnvSize);
-    CAMLreturn(Val_int(RT_buildPConstantTerm(Int_val(index), 
+    CAMLreturn(Val_int(RT_buildPConstantTerm(Int_val(index),
                                              Int_val(tyEnvSize))));
 }
 
@@ -253,4 +293,3 @@ int c_buildFreeVarType(value index)
     CAMLparam1 (index);
     CAMLreturn(Val_int(RT_buildFreeVarType(Int_val(index))));
 }
-

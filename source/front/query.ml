@@ -76,6 +76,9 @@ let showAnswers () =
   ()
 
 
+let getAnswers() = 
+  Ccode_stubs.getAnswers ()
+
 let queryHasVars () =
   Ccode_stubs.queryHasVars ()
 
