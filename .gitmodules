@@ -7,3 +7,6 @@
 [submodule "deps/ipython-ocaml-kernel"]
 	path = deps/ipython-ocaml-kernel
 	url = https://github.com/jpraher/ipython-ocaml-kernel
+[submodule "deps/deriving"]
+	path = deps/deriving
+	url = https://github.com/jpraher/deriving
