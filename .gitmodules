@@ -1,0 +1,9 @@
+[submodule "deps/ipython"]
+	path = deps/ipython
+	url = https://github.com/jpraher/ipython
+[submodule "deps/ipython-xlang-kernel"]
+	path = deps/ipython-xlang-kernel
+	url = https://github.com/jpraher/ipython-xlang-kernel
+[submodule "deps/ipython-ocaml-kernel"]
+	path = deps/ipython-ocaml-kernel
+	url = https://github.com/jpraher/ipython-ocaml-kernel
