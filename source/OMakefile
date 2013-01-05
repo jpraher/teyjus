@@ -19,19 +19,17 @@ INC = $(dir include)
 IPYTHON_KERNEL_LIB = $(dir ../deps/ipython-ocaml-kernel/)
 IPYTHON_KERNEL_CLIB = $(dir ../deps/ipython-xlang-kernel/)
 YOJSON = $(shell ocamlfind query yojson)
-DERIVING = /Users/jakob/extsrc/deriving/lib
+DERIVING = $(dir ../deps/deriving/lib)
 ############################################################
 # Compile flags
 #
 
 OCAMLINCLUDES += $(CMP) $(DIS) $(SIM) $(LOD) $(IPYTHON_KERNEL_LIB) $(DERIVING) $(YOJSON)
-# CAMLLIB += /Users/jakob/src/projects/ipython-ocaml-kernel
 CFLAGS += -g
 USE_OCAMLFIND = false
-# OCAMLFINDFLAGS = -syntax camlp4o -package dyntype.syntax
 OCAML_OTHER_LIBS += nums deriving
-OCAMLOPTFLAGS = -verbose # -pp deriving # -verbose -syntax camlp4o -package dyntype.syntax
-# OCAMLDEPFLAGS = -pp deriving
+OCAMLOPTFLAGS = -verbose
+
 ############################################################
 # Compilation files
 #

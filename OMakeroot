@@ -8,10 +8,12 @@ if $(mem $(OSTYPE), Win32 Cygwin)
 open build/C
 open build/OCaml
 
+DERIVING_SYNTAX=$(dir deps/deriving/syntax)
+
 Deriving(module) =
     section
-        OCAMLOPTFLAGS += -pp deriving
-        OCAMLDEPFLAGS += -pp deriving
+        OCAMLOPTFLAGS += -pp $(DERIVING_SYNTAX)/deriving
+        OCAMLDEPFLAGS += -pp $(DERIVING_SYNTAX)/deriving
         $(module).cmi:
         $(module).cmo:
         $(module).o:

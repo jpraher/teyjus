@@ -3,11 +3,5 @@
 Deriving(errormsg)
 Deriving(absyn)
 Deriving(symbol)
-# Deriving(table)
-
-#lpyacc.cmx: lpyacc.ml
-#	section rule
-#	 $(OCAMLOPT) $(PREFIXED_OCAMLPACKS) $(OCAMLFLAGS) \
-#			     $(PREFIXED_OCAMLINCLUDES) -c $<
 
 OCamlGeneratedFiles(lplex.ml lpyacc.ml)
