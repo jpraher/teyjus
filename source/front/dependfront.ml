@@ -22,9 +22,11 @@ open Parseargs
 
 module H = Hashtbl
 
+exception Errormsg_anyErrors
+
 let abortOnError () =
   if !Errormsg.anyErrors then
-    exit 1
+    raise Errormsg_anyErrors
 
 let unique list =
   let rec aux list =

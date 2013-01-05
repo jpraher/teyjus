@@ -22,6 +22,24 @@ module type TeyjusHandler = sig
 end
 
 
+let extract_signature = function
+  | (Preabsyn.Module (name,gconsts,lconsts,cconsts,useonlyconsts,exportdefconsts,
+             fixities, 
+             gkinds, lkinds, 
+             typeabbrevs, 
+             clauses,
+             accummods,accumsigs,usedsigs,impmods
+            )) ->
+     (Preabsyn.Signature (name,gconsts,useonlyconsts,exportdefconsts,
+                 gkinds,
+                 typeabbrevs,
+                 fixities,
+                 accumsigs,
+                 usedsigs))
+
+  | s -> s
+
+
 let compile parse lexbuf filename =
   let () = Lplex.setFileName lexbuf filename in
   let result = parse Lplex.initial lexbuf in
@@ -31,7 +49,11 @@ let suffix str len = (String.sub str len ((String.length str) - len))
   
 exception CompileError of string
   
-let raise_on_error descr = if !Errormsg.anyErrors then raise (CompileError descr)
+let raise_on_error descr = if !Errormsg.anyErrors then 
+    begin
+      prerr_endline ("Errormsg.anyErrors: " ^ descr);
+      raise (CompileError descr)
+    end
 
 let create_temp_dir basedir prefix suffix  =
   let counter = ref 0 in
@@ -68,10 +90,12 @@ let get_module obj default =
     | e -> default
 
 
-let handle_compile_program ctx code =
+let handle_compile_program ctx code m =
   try
-    let (sigresult, modresult) = compile Lpyacc.parseSigMod (Lexing.from_string (suffix code 0)) ".mod" in
+    let _ = Errormsg.reset () in 
+    let modresult = compile Lpyacc.parseModule (Lexing.from_string code) (m ^ ".mod") in
     let _ = raise_on_error "Parse failed" in
+    let sigresult = extract_signature modresult in 
     let (absyn, sigabsyn) = Translate.translate modresult sigresult in
     let _ = raise_on_error  "Construct absyn module failed" in
     (* Get the list of clauses and new clauses. *)
@@ -94,7 +118,8 @@ let handle_compile_program ctx code =
     let cwd = Unix.getcwd () in
     let _  = Unix.chdir temp_env in 
     let _  = prerr_endline ("working dir " ^ temp_env) in 
-    let _ = Hashtbl.add ctx module_name temp_env in
+    let _ = Module.setPath (temp_env ^ "/") in 
+    let _ = Hashtbl.replace ctx module_name temp_env in
     let bytecode_file = Filename.concat temp_env (Bytecode.makeByteCodeFileName module_name) in
     let _  = prerr_endline ("bytecode file " ^ bytecode_file) in 
     let _ = Bytecode.openOutChannel bytecode_file in
@@ -129,10 +154,10 @@ let handle_compile_program ctx code =
 let handle_query_program ctx code m =
    try
      let env_dir = Hashtbl.find ctx m in
-     Front.systemInit 0;
+     (* Front.systemInit 0; *)
      Module.setPath (env_dir ^ "/");
      Module.moduleLoad m;
-     Front.simulatorInit ();
+     Front.simulatorInit () ; 
      Module.moduleInstall m;
      Module.initModuleContext () ;
      (*todo interactive mode*)
@@ -150,13 +175,19 @@ let handle_query_program ctx code m =
        else
          numResults
      in
-     if Query.buildQueryTerm code (Module.getCurrentModule ()) then
-       begin
-         solve_query_batch_aux 0 ;
-         Success("text/plain", !result)
-       end
-     else
-       Error("Error_buildQueryTerm", code, [])
+     let result = 
+       if Query.buildQueryTerm code (Module.getCurrentModule ()) then
+         begin
+           solve_query_batch_aux 0 ;
+           Success("text/plain", !result)
+         end
+       else
+         Error("Error_buildQueryTerm", code, [])
+     in
+     Module.cleanModule ();
+     Front.simulatorReInit false;
+     Module.initModuleContext ();
+     result
    with 
      | e ->
          let ()  = prerr_endline ("Error " ^ (Printexc.to_string e) ^ " module " ^ m) in
@@ -177,7 +208,7 @@ struct
         | code ->
             match input with 
                 "program" -> 
-                  handle_compile_program ctx code
+                  handle_compile_program ctx code m
               | "query" ->
                   handle_query_program ctx code m
     with
@@ -194,6 +225,8 @@ module TeyjusIPython = Kernel.IPython(TeyjusHandler)
    main entry 
  *)
 let () =
+  Front.systemInit 0;
+  (* Front.simulatorInit (); *)
   Kernel.env_init Sys.executable_name ;
   Printexc.record_backtrace true; 
   let test_shutdown = (TeyjusIPython.init_kernel

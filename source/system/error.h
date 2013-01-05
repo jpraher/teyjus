@@ -38,10 +38,10 @@
 
 typedef enum EM_ExnType{
     EM_NO_ERR = 0,     // no errors
-    EM_NO_EXN,         // used for warnings ?? 
+    EM_NO_EXN,         // used for warnings ??
     EM_ABORT,          // exit the executable immediately
     EM_EXIT,           // traverse the exception stack and exit
-    EM_TOP_LEVEL,      // return to the toplevel 
+    EM_TOP_LEVEL,      // return to the toplevel
     EM_QUERY,          // abort solving the query
     EM_QUERY_RESULT,   // query is solved; print answer
     EM_FAIL,           // fail to simulator level
@@ -59,7 +59,7 @@ extern EM_ExnType      EM_CurrentExnType;
  * Exception-handling macros                                                *
  ****************************************************************************/
 
-//try 
+//try
 #define EM_TRY \
 if (EM_ExnHandlerStackTop >= EM_ExnHandlerStackSize) \
 { \
@@ -67,7 +67,7 @@ if (EM_ExnHandlerStackTop >= EM_ExnHandlerStackSize) \
      (EM_ExnHandlerStackSize + 1) * 2; \
    EM_ExnHandlerStack = \
      (SIGNAL_jmp_buf *)EM_realloc((void *)EM_ExnHandlerStack, \
-	   EM_ExnHandlerStackSize * sizeof(SIGNAL_jmp_buf)); \
+           EM_ExnHandlerStackSize * sizeof(SIGNAL_jmp_buf)); \
 } \
 if (SIGNAL_setjmp(EM_ExnHandlerStack[EM_ExnHandlerStackTop++]) == 0) \
 {
@@ -81,15 +81,15 @@ else
 //throw
 /* Jump to the nearest (in a dynamic sense) EM_Try block, setting
    EM_CurrentExnType to TYPE. Given a constant, the conditional in
-   this macro will be optimized away. 
-   
+   this macro will be optimized away.
+
    TODO: added cast to EM_CurrentExnType. */
 #define EM_THROW(type) EM_THROWVAL((type), 1)
 
 #define EM_THROWVAL(type, val) \
 do { \
    if ((type) == EM_ABORT) \
-      exit(1); \
+      abort();            \
    else \
    { \
       EM_CurrentExnType = (EM_ExnType)(type); \
@@ -167,4 +167,4 @@ void EM_error(int inIndex, ...);
 extern Boolean EM_anyErrors;
 void EM_reset();
 
-#endif  //ERROR_H 
+#endif  //ERROR_H

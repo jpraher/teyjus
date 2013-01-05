@@ -33,8 +33,8 @@ void* UTIL_malloc(size_t n)
     void* ptr = (void*)malloc(n);
     if (ptr) return ptr;
     printf("Error : cannot allocate space\n");
-    exit(1);
-    
+    abort();
+
 }
 
 
@@ -45,7 +45,7 @@ char* UTIL_mallocStr(size_t size)
     if (ptr) return ptr;
 
     printf("Error : cannot allocate space\n");
-    exit(1);
+    abort();
 }
 
 
@@ -57,7 +57,7 @@ char* UTIL_appendStr(char* str1, char* str2)
 {
   size_t length = strlen(str1) + strlen(str2);
   char* ptr = UTIL_mallocStr(length + 1);
-  
+
   strcpy(ptr, str1);
   strcat(ptr, str2);
 
@@ -79,7 +79,7 @@ char* UTIL_upperCase(char* str)
     return newstr;
 }
 
-//convert to lower cases     
+//convert to lower cases
 char* UTIL_lowerCase(char* str)
 {
     char *newstr, *tmp;
@@ -111,9 +111,9 @@ FILE* UTIL_fopenR(char* filename)
 {
     FILE* filePtr = fopen(filename, "r");
     if (filePtr) return filePtr;
-    
+
     printf("Error : cannot open input file %s\n", filename);
-    exit(1);
+    abort();
 }
 
 
@@ -122,9 +122,9 @@ FILE* UTIL_fopenW(char* filename)
 {
     FILE* filePtr = fopen(filename, "w");
     if (filePtr) return filePtr;
-    
+
     printf("Error : cannot open output file %s\n", filename);
-    exit(1);
+    abort();
 }
 
 /* close file */
@@ -132,4 +132,3 @@ void UTIL_fclose(FILE* file)
 {
     fclose(file);
 }
-

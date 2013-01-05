@@ -226,7 +226,7 @@ void MSG_addSwitch(char inSwitch, MSG_SwitchFunction inFunction)
         lSwitch->mFunction = inFunction;
 
         MSG_numSwitches++;
-    } else exit(1);			/* If we get here, increase
+    } else abort();			/* If we get here, increase
                                MSG_MAX_DYNAMIC_SWITCHES */
 }
 
@@ -288,6 +288,6 @@ int MSG_vMessage(int inIndex, va_list *ap)
             MSG_storedMessage = strdup(STREAM_getString(lStream));
             STREAM_close(lStream);
         }
-    } else exit(1);
+    } else abort();
     return lMessage->mExnType;
 }

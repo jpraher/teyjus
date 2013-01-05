@@ -38,6 +38,8 @@
 #include "../../system/message.h"
 #include "../../system/stream.h"
 
+int BI_inited = 0;
+
 /*****************************************************************/
 /* Builtin Dispatch Table                                        */
 /*****************************************************************/
@@ -254,9 +256,11 @@ static void BI_printErrno(char *inSwitch, WordPtr inStream, va_list *ioArgument)
 
 void BI_init()
 {
+    if (BI_inited)  return;
     /* add our errors and switches */
     MSG_addMessages(BI_NUM_ERROR_MESSAGES, BI_errorMessages);
     MSG_addSwitch('B', BI_printBuiltin);
     MSG_addSwitch('T', BI_printTerm);
     MSG_addSwitch('R', BI_printErrno);
+    BI_inited = 1;
 }

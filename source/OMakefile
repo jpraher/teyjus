@@ -16,14 +16,15 @@ LNK = $(dir linker)
 TST = $(dir test)
 INC = $(dir include)
 # IPYTHON = $(dir ipython)
-IPYTHON_KERNEL = /Users/jakob/src/projects/ipython-ocaml-kernel/
+IPYTHON_KERNEL_LIB = $(dir ../deps/ipython-ocaml-kernel/)
+IPYTHON_KERNEL_CLIB = $(dir ../deps/ipython-xlang-kernel/)
 YOJSON = $(shell ocamlfind query yojson)
 DERIVING = /Users/jakob/extsrc/deriving/lib
 ############################################################
 # Compile flags
 #
 
-OCAMLINCLUDES += $(CMP) $(DIS) $(SIM) $(LOD) $(IPYTHON_KERNEL) $(DERIVING) $(YOJSON)
+OCAMLINCLUDES += $(CMP) $(DIS) $(SIM) $(LOD) $(IPYTHON_KERNEL_LIB) $(DERIVING) $(YOJSON)
 # CAMLLIB += /Users/jakob/src/projects/ipython-ocaml-kernel
 CFLAGS += -g
 USE_OCAMLFIND = false
@@ -296,19 +297,14 @@ if $(not $(file-exists prebuilt))
     OCAML_CLIBS += liblink
     OCamlProgram(tjlink, $(LNK_MAIN) $(FNT_ML))
 
-  # integration with foreign library kernel and unix
   section
     USE_OCAMLFIND = true
-    KERNEL_LIB=/Users/jakob/src/projects/ipython-xlang-kernel/src
-    KERNEL_OCAML_LIB=/Users/jakob/src/projects/ipython-ocaml-kernel
-    OCAMLINCLUDES += /Users/jakob/src/projects/ipython-ocaml-kernel/ $(shell ocamlfind query yojson)
+    OCAMLINCLUDES +=  $(shell ocamlfind query yojson)
     OCAML_OTHER_LIBS += kernel
     OCAMLPACKS[] =
 	unix
 	yojson
-    OCAML_LINK_FLAGS += -cclib -L$(KERNEL_LIB) -cclib -lipython-xlang-kernel -cclib -L$(KERNEL_OCAML_LIB)
-    # StaticCLibrary(liblink, $(SIM_C) $(SYS_C) $(TBL_C) $(LNK_C) $(INC_C))
-    # OCAML_CLIBS += liblink
+    OCAML_LINK_FLAGS += -cclib -L$(IPYTHON_KERNEL_CLIB) -cclib -lipython-xlang-kernel -cclib -L$(IPYTHON_KERNEL_LIB)
     StaticCLibrary(libsim, \
       $(SIM_C) $(SYS_C) $(TBL_C) $(FNT_C) $(LOD_C) $(LNK_C) $(INC_C))
     OCAML_CLIBS += libsim
