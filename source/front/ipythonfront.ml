@@ -113,14 +113,11 @@ let handle_compile_program ctx code m =
     let _ = raise_on_error  "Generating code failed" in
     let module_name = Absyn.getModuleName absyn in
     let _  = prerr_endline ("module name " ^ module_name) in 
-    let temp_env = create_temp_env module_name in
-    let _  = prerr_endline ("temp dir " ^ temp_env) in 
     let cwd = Unix.getcwd () in
-    let _  = Unix.chdir temp_env in 
-    let _  = prerr_endline ("working dir " ^ temp_env) in 
-    let _ = Module.setPath (temp_env ^ "/") in 
-    let _ = Hashtbl.replace ctx module_name temp_env in
-    let bytecode_file = Filename.concat temp_env (Bytecode.makeByteCodeFileName module_name) in
+    let _  = print_endline ("current working dir " ^ cwd) in 
+    let _ = Module.setPath (cwd ^ "/") in 
+    (* let _ = Hashtbl.replace ctx module_name temp_ in*)
+    let bytecode_file = Bytecode.makeByteCodeFileName module_name in
     let _  = prerr_endline ("bytecode file " ^ bytecode_file) in 
     let _ = Bytecode.openOutChannel bytecode_file in
     let _ = raise_on_error  "Generating code failed" in
@@ -153,7 +150,7 @@ let handle_compile_program ctx code m =
 
 let handle_query_program ctx code m =
    try
-     let env_dir = Hashtbl.find ctx m in
+     let env_dir = Unix.getcwd () (*Hashtbl.find ctx m*) in
      (* Front.systemInit 0; *)
      Module.setPath (env_dir ^ "/");
      Module.moduleLoad m;
@@ -229,11 +226,12 @@ let () =
   (* Front.simulatorInit (); *)
   Kernel.env_init Sys.executable_name ;
   Printexc.record_backtrace true; 
-  let test_shutdown = (TeyjusIPython.init_kernel
+  let kernel = (TeyjusIPython.init_kernel
                          (Array.to_list Sys.argv) (Hashtbl.create 44) TeyjusHandler.execute_request) in
-  while not (test_shutdown()) do
+  while not (Kernel.has_shutdown kernel) do
     Unix.sleep 1
   done;
+  Kernel.free kernel
     
-
+    
 
