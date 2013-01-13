@@ -18,7 +18,7 @@ external link : string -> int -> int = "FRONT_link"
 
 module type TeyjusHandler = sig
   type ctx_t 
-  val execute_request : ctx_t -> Kernel.execute_request_t -> Kernel.execute_response_t
+  val execute_request : Kernel.ip_shell -> ctx_t -> Kernel.execute_request_t -> Kernel.execute_response_t
 end
 
 
@@ -90,7 +90,7 @@ let get_module obj default =
     | e -> default
 
 
-let handle_compile_program ctx code m =
+let handle_compile_program shell ctx code m =
   try
     let _ = Errormsg.reset () in 
     let modresult = compile Lpyacc.parseModule (Lexing.from_string code) (m ^ ".mod") in
@@ -135,7 +135,7 @@ let handle_compile_program ctx code m =
     (* let out_chan = open_out "absyn.txt" in
        let () = output_string out_chan absyn_str in 
        let () = close_out out_chan in *)
-    Success("text/plain", "" (*Absyn.Show_amodule.show absyn*) )
+    Success("text/plain", code (*Absyn.Show_amodule.show absyn*) )
   with
     | CompileError descr -> 
         let () = flush_all () in 
@@ -148,7 +148,14 @@ let handle_compile_program ctx code m =
         Error("Unkonwn error!", (Printexc.to_string e), [])
           
 
-let handle_query_program ctx code m =
+let input_more_results shell = 
+  let answer = Kernel.shell_raw_input shell "More results?" in
+  match answer with
+      "y" -> true
+    | _ -> false
+
+        
+let handle_query_program shell ctx code m =
    try
      let env_dir = Unix.getcwd () (*Hashtbl.find ctx m*) in
      (* Front.systemInit 0; *)
@@ -157,8 +164,15 @@ let handle_query_program ctx code m =
      Front.simulatorInit () ; 
      Module.moduleInstall m;
      Module.initModuleContext () ;
-     (*todo interactive mode*)
-     let max_solutions = 1 in
+
+     (* TODO
+         - interactive mode
+         - simple callback is not available
+         - multiple outs are ok
+         - but input/output coupling is aslo interesting
+         - state on server? / state on client?
+     *)
+     let max_solutions = 10 in
      let result = ref "" in
      let rec solve_query_batch_aux numResults =
        if Query.solveQuery () && numResults < max_solutions then
@@ -195,7 +209,7 @@ let handle_query_program ctx code m =
 module TeyjusHandler = 
 struct
   type ctx_t = (string, string) Hashtbl.t
-  let execute_request ctx request = 
+  let execute_request shell ctx request = 
     try 
       let code = get_code request.content in 
       let input = get_input request.content "program" in
@@ -205,9 +219,9 @@ struct
         | code ->
             match input with 
                 "program" -> 
-                  handle_compile_program ctx code m
+                  handle_compile_program shell ctx code m
               | "query" ->
-                  handle_query_program ctx code m
+                  handle_query_program shell ctx code m
     with
       | e ->
           let ()  = flush_all () in
@@ -218,6 +232,8 @@ end
 module TeyjusIPython = Kernel.IPython(TeyjusHandler) 
     
 
+
+
 (* 
    main entry 
  *)
@@ -227,11 +243,11 @@ let () =
   Kernel.env_init Sys.executable_name ;
   Printexc.record_backtrace true; 
   let kernel = (TeyjusIPython.init_kernel
-                         (Array.to_list Sys.argv) (Hashtbl.create 44) TeyjusHandler.execute_request) in
+                         (Array.to_list Sys.argv) 
+                         (*ctx*) (Hashtbl.create 44) 
+                         TeyjusHandler.execute_request) in
   while not (Kernel.has_shutdown kernel) do
     Unix.sleep 1
   done;
   Kernel.free kernel
     
-    
-
